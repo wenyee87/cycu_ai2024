@@ -16,8 +16,8 @@ filepath = os.path.join(path ,excel_file)
 # 讀取 Excel 文件
 df = pd.read_excel(filepath, sheet_name='交通事故簡報通報資料')
 
-#篩選 欄位名稱 為'國道名稱' 的資料， 我只要名稱為'國道3號'的資料，而且只要'方向'為'南'的資料
-df1 = df[(df['國道名稱'] == '國道3號') & (df['方向'] == '南')]
+#篩選 欄位名稱 為'國道名稱' 的資料， 我只要名稱為'國道3號'的資料，而且只要'方向'為'北'的資料
+df1 = df[(df['國道名稱'] == '國道3號') & (df['方向'] == '北')]
 
 
 
@@ -53,7 +53,7 @@ import matplotlib.pyplot as plt
 for index, row in df1.iterrows():
     plt.plot([row['事件開始1'], row['事件排除1']], [row['里程'], row['里程']])
 
-plt.title('國道3號南下(11022150温浥勛)', fontproperties='SimSun')
+plt.title('國道3號北上(11022150温浥勛)', fontproperties='SimSun')
 plt.xlabel('事件時間', fontproperties='SimSun')
 plt.ylabel('里程', fontproperties='SimSun')
 plt.show()
