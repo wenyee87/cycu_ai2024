@@ -30,5 +30,22 @@ if res.status_code == 200:
 else:
     print("Failed to download file, status code: ", res.status_code)
 
+import pandas as pd
 
-                
+dataframes = []
+
+for i in range(0, 24):
+    for j in range(0, 60, 5):
+        filename = '''TDCS_M04A_20240325_{:02d}{:02d}00.csv'''.format(i,j)
+        res = requests.get(url + filename)
+        if res.status_code == 200:
+            with open(filename,'wb') as f:
+                f.write(res.content)
+            df = pd.read_csv(filename)
+            dataframes.append(df)
+
+# Concatenate all data into one DataFrame
+all_data = pd.concat(dataframes, ignore_index=True)
+
+# Save all data to a csv file
+all_data.to_csv('all_data.csv', index=False)
