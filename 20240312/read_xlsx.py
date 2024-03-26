@@ -10,20 +10,20 @@ import pandas as pd
 
 excel_file = '112年1-10月交通事故簡訊通報資料.xlsx'
 
+import os
+
 filepath = os.path.join(path ,excel_file)
 
-
 # 讀取 Excel 文件
+import pandas as pd
+
 df = pd.read_excel(filepath, sheet_name='交通事故簡報通報資料')
 
 #篩選 欄位名稱 為'國道名稱' 的資料， 我只要名稱為'國道3號'的資料，而且只要'方向'為'北'的資料
 df1 = df[(df['國道名稱'] == '國道3號') & (df['方向'] == '北')]
 
-
-
-#把 欄位 '年' '月' '日' '時' '分'
-#合併成一個欄位 '日期' , 並且轉換成日期格式
-df1['事件開始'] = df1['年'].astype(str) + '-' + df1['月'].astype(str) + '-' + df1['日'].astype(str) + ' ' + df1['時'].astype(str) + ':' + df1['分'].astype(str)
+#把 欄位 '年' '月' '日' '時' '分' 合併成一個欄位 '日期' , 並且轉換成日期格式
+df1['日期'] = pd.to_datetime(df1['年'].astype(str) + '-' + df1['月'].astype(str) + '-' + df1['日'].astype(str) + ' ' + df1['時'].astype(str) + ':' + df1['分'].astype(str))
 df1['事件開始'] = pd.to_datetime(df1['事件開始'])
 
 #把 欄位 '年' '月' '日' '事件排除'  合併成一個欄位 '事件排除' , 並且轉換成日期格式
