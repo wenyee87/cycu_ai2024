@@ -1,51 +1,37 @@
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 import requests
+import pandas as pd
+from io import StringIO
 
+# 網頁 URL
 base_url = "https://tisvcloud.freeway.gov.tw/history/TDCS/M04A/20240325/"
 
-for i in range(0, 24):
-    url = base_url + "{:02d}/".format(i)
-    for j in range(0, 60, 5 ):
-        filename='''TDCS_M04A_20240325_{:02d}{:02d}00.csv'''.format(i,j)
-        print(filename)
-        res = requests.get(url + filename)
-        if res.status_code == 200:
-            with open(filename, 'wb') as f:
-                f.write(res.content)
+# 儲存所有的 DataFrame
+dfs = []
 
+# 遍歷每個小時
+for hour in range(24):
+    # 遍歷每個五分鐘的時間段
+    for minute in range(0, 60, 5):
+        # 建立 URL
+        url = f"{base_url}{str(hour).zfill(2)}/TDCS_M04A_20240325_{str(hour).zfill(2)}{str(minute).zfill(2)}00.csv"
+        
+        # 嘗試下載 CSV 檔案
+        try:
+            response = requests.get(url, verify=False)
+            df = pd.read_csv(StringIO(response.text), usecols=[0, 1, 2, 3, 4, 5], 
+                             names=['時間', '上游偵測站編號', '下游偵測站編號', '車種', '中位數旅行時間', '交通量'], 
+                             index_col=0, parse_dates=True)
+            dfs.append(df)
+        except Exception as e:
+            print(f"Failed to download {url}: {e}")
 
-filename='''TDCS_M04A_20240325_000000.csv'''
-#filename 最後面的數字代表的是小時 分鐘 秒，例如000000代表00:00:00 
-#000500 代表 00:05:00
-#如果每5分鐘一筆資料，利用迴圈產生檔名
-#例如:  TDCS_M04A_20240325_000000.csv
-#              TDCS_M04A_20240325_000500.csv
-for i in range(0, 1):
-    for j in range(0, 60, 5 ):
-        filename='''TDCS_M04A_20240325_{:02d}{:02d}00.csv'''.format(i,j)
-        print(filename)
-        res = requests.get(url + filename)
-if res.status_code == 200:
-    with open(filename,'wb') as f:
-        f.write(res.content)
-else:
-    print("Failed to download file, status code: ", res.status_code)
+# 合併所有的 DataFrame
+df = pd.concat(dfs,axis=0)
 
-import pandas as pd
+# 依照索引排序
+df.sort_index(inplace=True)
 
-dataframes = []
-
-for i in range(0, 24):
-    for j in range(0, 60, 5):
-        filename = '''TDCS_M04A_20240325_{:02d}{:02d}00.csv'''.format(i,j)
-        res = requests.get(url + filename)
-        if res.status_code == 200:
-            with open(filename,'wb') as f:
-                f.write(res.content)
-            df = pd.read_csv(filename)
-            dataframes.append(df)
-
-# Concatenate all data into one DataFrame
-all_data = pd.concat(dataframes, ignore_index=True)
-
-# Save all data to a csv file
-all_data.to_csv('all_data.csv', index=False)
+# 輸出為一個新的 CSV 檔案
+df.to_csv("C:\\Users\\User\\Desktop\\cycu_ai2024\\20240326\\output5.csv")
